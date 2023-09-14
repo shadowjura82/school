@@ -64,4 +64,10 @@ public class FacultyController {
         if (facultyService.printAll().isEmpty()) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(facultyService.findByNameIgnoreCaseOrColorIgnoreCase(name, color));
     }
+
+    @GetMapping(path = "getStudents")
+    public ResponseEntity<Collection<Student>> getStudents(@RequestParam Long Id) {
+        if (facultyService.printAll().isEmpty()) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(facultyService.getStudents(Id));
+    }
 }

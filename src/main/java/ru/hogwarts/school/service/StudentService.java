@@ -54,7 +54,4 @@ public class StudentService {
         if (!studentRepository.existsById(Id)) return null;
         return studentRepository.findById(Id).get().getFaculty();
     }
-    public Collection<Student> findByFaculty_id(Long Id) {
-        return studentRepository.findByFaculty_id(Id);
-    }
 }

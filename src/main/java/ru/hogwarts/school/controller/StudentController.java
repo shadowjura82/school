@@ -71,11 +71,4 @@ public class StudentController {
         if (studentService.printAll().isEmpty()) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(studentService.getFaculty(Id));
     }
-
-    @GetMapping(path = "findByFaculty_id")
-    public ResponseEntity<Collection<Student>> findByFaculty_id(@RequestParam Long Id) {
-        if (studentService.printAll().isEmpty()) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(studentService.findByFaculty_id(Id));
-    }
-
 }
