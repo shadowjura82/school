@@ -21,25 +21,28 @@ public class StudentService {
     }
 
     public Student readStudent(Long id) {
-        if (studentRepository.existsById(id)) return studentRepository.findById(id).get();
-        return null;
+        return studentRepository.findById(id).orElse(null);
     }
 
     public Student updateStudent(Student student) {
+        Student upfatedStudent = readStudent(student.getId());
+        if (upfatedStudent == null) {
+            return null;
+        }
         return studentRepository.save(student);
     }
 
     public Student deleteStudent(Long id) {
         Student student = readStudent(id);
-        if (student == null) return null;
-        studentRepository.deleteById(id);
+        if (student == null) {
+            return null;
+        }
+        studentRepository.delete(student);
         return student;
     }
 
     public Collection<Student> filterByAge(int age) {
-        return studentRepository.findAll().stream()
-                .filter(e -> e.getAge() == age)
-                .collect(Collectors.toList());
+        return studentRepository.findByAge(age);
     }
 
     public Collection<Student> printAll() {
@@ -50,8 +53,9 @@ public class StudentService {
         return studentRepository.findByAgeBetween(startAge, endAge);
     }
 
-    public Faculty getFaculty(Long Id) {
-        if (!studentRepository.existsById(Id)) return null;
-        return studentRepository.findById(Id).get().getFaculty();
+    public Faculty getFaculty(Long id) {
+        return studentRepository.findById(id)
+                .map(Student::getFaculty)
+                .orElse(null);
     }
 }

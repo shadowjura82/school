@@ -21,7 +21,9 @@ public class FacultyController {
     @GetMapping("{id}")
     public ResponseEntity<Faculty> getFacility(@PathVariable Long id) {
         Faculty faculty = facultyService.readFaculty(id);
-        if (faculty == null) return ResponseEntity.notFound().build();
+        if (faculty == null) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(faculty);
     }
 
@@ -33,41 +35,39 @@ public class FacultyController {
     @PutMapping
     public ResponseEntity<Faculty> updateFacility(@RequestBody Faculty faculty) {
         Faculty foundFaculty = facultyService.updateFaculty(faculty);
-        if (foundFaculty == null) return ResponseEntity.notFound().build();
+        if (foundFaculty == null) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(facultyService.updateFaculty(faculty));
     }
 
     @DeleteMapping("{id}")
     public ResponseEntity<Faculty> deleteFacility(@PathVariable Long id) {
         Faculty faculty = facultyService.deleteFaculty(id);
-        if (faculty == null) return ResponseEntity.notFound().build();
+        if (faculty == null) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(faculty);
     }
 
     @GetMapping(path = "filter")
     public ResponseEntity<Collection<Faculty>> filterByColor(@RequestParam String color) {
         Collection<Faculty> filteredFaculty = facultyService.filterByColor(color);
-        if (filteredFaculty.isEmpty()) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(filteredFaculty);
     }
 
     @GetMapping
     public ResponseEntity<Collection<Faculty>> printAll() {
-        if (facultyService.printAll().isEmpty()) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(facultyService.printAll());
     }
 
-    @GetMapping(path = "filter_param")
-    public ResponseEntity<Collection<Faculty>> findByNameIgnoreCaseOrColorIgnoreCase(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String color) {
-        if (facultyService.printAll().isEmpty()) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(facultyService.findByNameIgnoreCaseOrColorIgnoreCase(name, color));
+    @GetMapping(path = "filterByColorOrName")
+    public ResponseEntity<Collection<Faculty>> findByNameIgnoreCaseOrColorIgnoreCase(@RequestParam String nameOrColor) {
+        return ResponseEntity.ok(facultyService.findByNameIgnoreCaseOrColorIgnoreCase(nameOrColor));
     }
 
-    @GetMapping(path = "getStudents")
-    public ResponseEntity<Collection<Student>> getStudents(@RequestParam Long Id) {
-        if (facultyService.printAll().isEmpty()) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(facultyService.getStudents(Id));
+    @GetMapping(path = "/{id}/students")
+    public ResponseEntity<Collection<Student>> getStudents(@PathVariable Long id) {
+        return ResponseEntity.ok(facultyService.getStudents(id));
     }
 }

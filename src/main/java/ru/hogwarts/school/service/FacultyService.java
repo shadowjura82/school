@@ -6,6 +6,7 @@ import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repositories.FacultyRepository;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,36 +22,41 @@ public class FacultyService {
     }
 
     public Faculty readFaculty(Long id) {
-        if (facultyRepository.existsById(id)) return facultyRepository.findById(id).get();
-        return null;
+        return facultyRepository.findById(id).orElse(null);
     }
 
     public Faculty updateFaculty(Faculty faculty) {
+        Faculty upfatedFaculty = readFaculty(faculty.getId());
+        if (upfatedFaculty == null) {
+            return null;
+        }
         return facultyRepository.save(faculty);
     }
 
     public Faculty deleteFaculty(Long id) {
         Faculty faculty = readFaculty(id);
-        if (faculty == null) return null;
-        facultyRepository.deleteById(id);
+        if (faculty == null) {
+            return null;
+        }
+        facultyRepository.delete(faculty);
         return faculty;
     }
 
     public Collection<Faculty> filterByColor(String color) {
-        return facultyRepository.findAll().stream()
-                .filter(e -> e.getColor().equals(color))
-                .collect(Collectors.toList());
+        return facultyRepository.findByColorLikeIgnoreCase(color);
     }
 
     public Collection<Faculty> printAll() {
         return facultyRepository.findAll();
     }
 
-    public Collection<Faculty> findByNameIgnoreCaseOrColorIgnoreCase(String name, String color) {
-        return facultyRepository.findByNameIgnoreCaseOrColorIgnoreCase(name, color);
+    public Collection<Faculty> findByNameIgnoreCaseOrColorIgnoreCase(String nameOrColor) {
+        return facultyRepository.findByNameIgnoreCaseOrColorIgnoreCase(nameOrColor, nameOrColor);
     }
 
-    public Collection<Student> getStudents(Long Id) {
-        return facultyRepository.findById(Id).get().getStudents();
+    public Collection<Student> getStudents(Long id) {
+        return facultyRepository.findById(id)
+                .map(Faculty::getStudents)
+                .orElseGet(Collections::emptyList);
     }
 }

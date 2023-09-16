@@ -8,8 +8,6 @@ import org.springframework.context.annotation.Configuration;
 
 @SpringBootApplication
 @OpenAPIDefinition
-@Configuration
-@EnableAutoConfiguration
 public class SchoolApplication {
 
 	public static void main(String[] args) {

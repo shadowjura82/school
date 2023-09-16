@@ -22,7 +22,9 @@ public class StudentController {
     @GetMapping("{id}")
     public ResponseEntity<Student> getStudent(@PathVariable Long id) {
         Student student = studentService.readStudent(id);
-        if (student == null) return ResponseEntity.notFound().build();
+        if (student == null) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(student);
     }
 
@@ -34,27 +36,29 @@ public class StudentController {
     @PutMapping
     public ResponseEntity<Student> updateStudent(@RequestBody Student student) {
         Student foundStudent = studentService.updateStudent(student);
-        if (foundStudent == null) return ResponseEntity.notFound().build();
+        if (foundStudent == null) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(studentService.updateStudent(student));
     }
 
     @DeleteMapping("{id}")
     public ResponseEntity<Student> deleteStudent(@PathVariable Long id) {
         Student student = studentService.deleteStudent(id);
-        if (student == null) return ResponseEntity.notFound().build();
+        if (student == null) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(student);
     }
 
     @GetMapping(path = "filter")
     public ResponseEntity<Collection<Student>> filterByAge(@RequestParam int age) {
         Collection<Student> filteredStudents = studentService.filterByAge(age);
-        if (filteredStudents.isEmpty()) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(filteredStudents);
     }
 
     @GetMapping
     public ResponseEntity<Collection<Student>> printAll() {
-        if (studentService.printAll().isEmpty()) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(studentService.printAll());
     }
 
@@ -62,13 +66,15 @@ public class StudentController {
     public ResponseEntity<Collection<Student>> findByAgeBetween(
             @RequestParam Integer startAge,
             @RequestParam Integer endAge) {
-        if (studentService.printAll().isEmpty()) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(studentService.findByAgeBetween(startAge, endAge));
     }
 
-    @GetMapping(path = "getFaculty")
-    public ResponseEntity<Faculty> getFaculty(@RequestParam Long Id) {
-        if (studentService.printAll().isEmpty()) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(studentService.getFaculty(Id));
+    @GetMapping(path = "/{id}/faculty")
+    public ResponseEntity<Faculty> getFaculty(@PathVariable Long id) {
+        Faculty faculty = studentService.getFaculty(id);
+        if (faculty == null) {
+            return null;
+        }
+        return ResponseEntity.ok(faculty);
     }
 }
