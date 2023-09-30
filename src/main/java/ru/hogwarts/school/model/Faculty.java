@@ -14,6 +14,13 @@ public class Faculty {
     @OneToMany(mappedBy = "faculty")
     private Collection<Student> students;
 
+    public Faculty(Long id, String name, String color, Collection<Student> students) {
+        this.id = id;
+        this.name = name;
+        this.color = color;
+        this.students = students;
+    }
+
     public Faculty(Long id, String name, String color) {
         this.id = id;
         this.name = name;

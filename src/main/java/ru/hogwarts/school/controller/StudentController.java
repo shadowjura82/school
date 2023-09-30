@@ -73,7 +73,7 @@ public class StudentController {
     public ResponseEntity<Faculty> getFaculty(@PathVariable Long id) {
         Faculty faculty = studentService.getFaculty(id);
         if (faculty == null) {
-            return null;
+            return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(faculty);
     }
