@@ -15,6 +15,10 @@ public class TestConstants {
     public static final Student STUDENT = new Student(DB_ID_CONSTANT, NAME_CONSTANT, AGE_CONSTANT, FACULTY);
     public static final Student STUDENT2 = new Student(2L, "Mock_name", 50, FACULTY);
     public static final List<Student> COLLECTION_OF_STUDENTS = new ArrayList<>(List.of(STUDENT, STUDENT2));
-    public static final Faculty FACULTY2 = new Faculty(DB_ID_CONSTANT, NAME_CONSTANT, COLOR_CONSTANT, COLLECTION_OF_STUDENTS);
-    public static final List<Faculty> COLLECTION_OF_FACULTIES = new ArrayList<>(List.of(FACULTY2, FACULTY2));
+    public static final Faculty FACULTY2 = new Faculty(DB_ID_CONSTANT, NAME_CONSTANT, COLOR_CONSTANT);
+    public static final Student STUDENT3 = new Student(3L, "Mock_name", 24, FACULTY);
+    public static final Faculty FACULTY_ID_1 = new Faculty(1L, "TestingName", "red", new ArrayList<>());
+    public static final Faculty FACULTY_ID_2 = new Faculty(2L, "Mock_name", "Mock_color", new ArrayList<>());
+    public static final Faculty FACULTY_ID_3 = new Faculty(3L, "Mock_name", "red", new ArrayList<>());
+    public static final List<Faculty> COLLECTION_OF_FACULTIES = new ArrayList<>(List.of(FACULTY_ID_1, FACULTY_ID_2));
 }
