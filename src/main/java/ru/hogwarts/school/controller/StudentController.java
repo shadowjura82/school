@@ -4,10 +4,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.model.Faculty;
+import ru.hogwarts.school.model.FiveLastStudents;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.StudentService;
 
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/student")
@@ -76,5 +78,20 @@ public class StudentController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(faculty);
+    }
+
+    @GetMapping(path = "students-count")
+    public ResponseEntity<Integer> getStudentsAmount() {
+        return ResponseEntity.ok(studentService.getStudentsAmount());
+    }
+
+    @GetMapping(path = "students-avg-age")
+    public ResponseEntity<Double> getAverageAge() {
+        return ResponseEntity.ok(studentService.getAverageAge());
+    }
+
+    @GetMapping(path = "students-five-last")
+    public ResponseEntity<List<FiveLastStudents>> getFiveLastStudents() {
+        return ResponseEntity.ok(studentService.getFiveLastStudents());
     }
 }

@@ -1,8 +1,6 @@
 package ru.hogwarts.school.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,12 +13,10 @@ import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.PUT;
 import static ru.hogwarts.school.TestConstants.*;
@@ -141,13 +137,12 @@ class FacultyControllerTest {
 
     @Test
     void getStudents() {
-        Student student1 = new Student(1L, "name", 23, null);
-        Student student2 = new Student(2L, "name2", 22, null);
         Faculty facultyToSave = new Faculty(1L, "name", "blue", null);
-        student1.setFaculty(facultyToSave);
-        student2.setFaculty(facultyToSave);
+        Student student1 = new Student(1L, "name", 23, facultyToSave);
+        Student student2 = new Student(2L, "name2", 22, facultyToSave);
         List<Student> listOfStudents = new ArrayList<>(List.of(student1, student2));
         facultyToSave.setStudents(listOfStudents);
+
         testRestTemplate.postForEntity("http://localhost:" + port + "/student", student1, Student.class);
         testRestTemplate.postForEntity("http://localhost:" + port + "/student", student2, Student.class);
         Faculty faculty = newFaculty(facultyToSave);

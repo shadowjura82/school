@@ -1,33 +1,24 @@
 package ru.hogwarts.school.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repositories.StudentRepository;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.PUT;
-import static org.springframework.http.ResponseEntity.ok;
-import static org.springframework.http.ResponseEntity.status;
 import static ru.hogwarts.school.TestConstants.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -149,5 +140,47 @@ class StudentControllerTest {
                 testRestTemplate.getForEntity("http://localhost:" + port + "/student/" + -1 + "/faculty", Faculty.class);
         assertThat(responseNull.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         deleteStudent(student.getId());
+    }
+
+    @Test
+    void getStudentsAmount() {
+        Integer result =
+                testRestTemplate.getForObject("http://localhost:" + port + "/student/students-count", Integer.class);
+        assertThat(result.intValue()).isEqualTo(0);
+        Student student = newStudent(STUDENT);
+        result =
+                testRestTemplate.getForObject("http://localhost:" + port + "/student/students-count", Integer.class);
+        assertThat(result.intValue()).isEqualTo(1);
+        deleteStudent(student.getId());
+    }
+
+    @Test
+    void getAverageAge() {
+        Student student1 = newStudent(STUDENT);
+        Student student2 = newStudent(STUDENT2);
+        Double result =
+                testRestTemplate.getForObject("http://localhost:" + port + "/student/students-avg-age", Double.class);
+        assertThat(result.doubleValue()).isEqualTo(37);
+        deleteStudent(student1.getId());
+        deleteStudent(student2.getId());
+    }
+
+    @Test
+    void getFiveLastStudents() {
+        List<Student> listOfStudents = new ArrayList<>(List.of(
+                newStudent(new Student(2L, "Mock_name", 50, FACULTY)),
+                newStudent(new Student(3L, "Mock_name", 50, FACULTY)),
+                newStudent(new Student(4L, "Mock_name", 50, FACULTY)),
+                newStudent(new Student(5L, "Mock_name", 50, FACULTY)),
+                newStudent(new Student(6L, "Mock_name", 50, FACULTY))
+        ));
+        Collections.reverse(listOfStudents);
+        Student mockStudent = newStudent(new Student(1L, "Mock_name", 50, FACULTY));
+
+        List result =
+                testRestTemplate.getForObject("http://localhost:" + port + "/student/students-five-last", List.class);
+        assertThat(result).isEqualTo(listOfStudents);
+        listOfStudents.forEach(e -> deleteStudent(e.getId()));
+        deleteStudent(mockStudent.getId());
     }
 }

@@ -163,4 +163,36 @@ class StudentControllerMockTest {
                         .get("/student/{id}/faculty", "222"))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    public void getStudentsAmount() throws Exception {
+        when(studentRepository.getStudentsAmount()).thenReturn(4);
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/student/students-count"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("4"));
+    }
+
+    @Test
+    void getAverageAge() throws Exception {
+        when(studentRepository.getAverageAge()).thenReturn(37.22);
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/student/students-avg-age"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("37.22"));
+    }
+
+    @Test
+    void getFiveLastStudents() {
+        List<Student> listOfStudents = new ArrayList<>(List.of(
+                new Student(2L, "Mock_name", 50, FACULTY),
+                new Student(3L, "Mock_name", 50, FACULTY),
+                new Student(4L, "Mock_name", 50, FACULTY),
+                new Student(5L, "Mock_name", 50, FACULTY),
+                new Student(6L, "Mock_name", 50, FACULTY)
+        ));
+//        when(studentRepository.getFiveLastStudents()).thenReturn(listOfStudents);
+
+//        Нужно узнать как сделать этот тест
+    }
 }
