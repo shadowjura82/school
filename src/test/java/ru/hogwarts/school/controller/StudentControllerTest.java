@@ -88,6 +88,7 @@ class StudentControllerTest {
         assertThat(result.getBody()).isEqualTo(studentHttpEntity.getBody());
         result = testRestTemplate.exchange("http://localhost:" + port + "/student/" + student.getId(), DELETE, studentHttpEntity, Student.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        deleteStudent(student.getId());
     }
 
     @Test
@@ -163,6 +164,7 @@ class StudentControllerTest {
         assertThat(result.doubleValue()).isEqualTo(37);
         deleteStudent(student1.getId());
         deleteStudent(student2.getId());
+
     }
 
     @Test
