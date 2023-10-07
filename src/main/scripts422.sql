@@ -10,7 +10,5 @@ create table human(
 	name text,
 	age integer,
 	is_driver boolean,
-	car_id integer references car (id),
-	constraint car_is_not_null not null (car_id)
-	constraint fk_car foreign key car_id references
+	car_id integer not null references car (id)
 );
