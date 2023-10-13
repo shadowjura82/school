@@ -13,9 +13,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.hogwarts.school.controller.FacultyController;
 import ru.hogwarts.school.model.Faculty;
+import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repositories.FacultyRepository;
 import ru.hogwarts.school.service.FacultyService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -157,11 +160,16 @@ class FacultyControllerMockTest {
 
     @Test
     public void getStudentsTest() throws Exception {
-        when(facultyRepository.findById(anyLong())).thenReturn(Optional.of(FACULTY2));
-
+        Faculty faculty = new Faculty(1L, "TestingName", "red", null);
+        List<Student> studentList= new ArrayList<>(List.of(
+                new Student(1L, "Mock_name", 24, faculty),
+                new Student(2L, "Mock_name", 24, faculty)
+        ));
+        faculty.setStudents(studentList);
+        when(facultyRepository.findById(anyLong())).thenReturn(Optional.of(faculty));
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/faculty/{id}/students", "1"))
                 .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(COLLECTION_OF_STUDENTS)));
+                .andExpect(content().json(mapper.writeValueAsString(studentList)));
     }
 }

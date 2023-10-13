@@ -1,6 +1,8 @@
 package ru.hogwarts.school.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,15 +13,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
+import ru.hogwarts.school.repositories.FacultyRepository;
 import ru.hogwarts.school.repositories.StudentRepository;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.PUT;
-import static ru.hogwarts.school.TestConstants.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class StudentControllerTest {
@@ -29,118 +30,109 @@ class StudentControllerTest {
     private TestRestTemplate testRestTemplate;
     @Autowired
     private StudentRepository studentRepository;
+    @Autowired
+    private FacultyRepository facultyRepository;
     private ObjectMapper mapper = new ObjectMapper();
 
-    private Student newStudent(Student student) {
-        ResponseEntity<Student> newStudentResponse =
-                testRestTemplate.postForEntity("http://localhost:" + port + "/student", student, Student.class);
-        assertThat(newStudentResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        return newStudentResponse.getBody();
-    }
-
-    private void deleteStudent(Long id) {
-        testRestTemplate.delete("http://localhost:" + port + "/student/" + id);
+    @AfterEach
+    private void ClearDatabase() {
+        studentRepository.deleteAll();
     }
 
     @Test
     void getStudent() {
-        Student student = newStudent(STUDENT);
+        Student student = studentRepository.save(new Student(1L, "TestingName", 24, null));
         ResponseEntity<Student> response =
                 testRestTemplate.getForEntity("http://localhost:" + port + "/student/" + student.getId(), Student.class);
-        Student studentResponse = response.getBody();
-        assertThat(studentResponse).isEqualTo(student);
+        assertThat(response.getBody()).isEqualTo(student);
         ResponseEntity<Student> responseNull =
                 testRestTemplate.getForEntity("http://localhost:" + port + "/student/" + -1, Student.class);
         assertThat(responseNull.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        deleteStudent(student.getId());
     }
 
     @Test
-    void postStudent() {
-        Student student = newStudent(STUDENT);
-        deleteStudent(student.getId());
+    void postStudent() throws Exception {
+        Student student = new Student(1L, "TestingName", 24, null);
+        ResponseEntity<Student> newStudentResponse =
+                testRestTemplate.postForEntity("http://localhost:" + port + "/student", student, Student.class);
+        assertThat(newStudentResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        student.setId(newStudentResponse.getBody().getId());
+        assertThat(student).isEqualTo(newStudentResponse.getBody());
     }
 
     @Test
     void updateStudentTest() {
-        Student student = newStudent(STUDENT);
-
-        HttpEntity<Student> studentHttpEntity = new HttpEntity<>(STUDENT2);
+        Student student = studentRepository.save(new Student(1L, "TestingName", 24, null));
+        HttpEntity<Student> studentHttpEntity = new HttpEntity<>(new Student(2L, "Mock_name", 50, null));
         ResponseEntity<Student> result =
                 testRestTemplate.exchange("http://localhost:" + port + "/student", PUT, studentHttpEntity, Student.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-
         studentHttpEntity.getBody().setId(student.getId());
         result = testRestTemplate.exchange("http://localhost:" + port + "/student", PUT, studentHttpEntity, Student.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(result.getBody()).isEqualTo(studentHttpEntity.getBody());
-        deleteStudent(student.getId());
     }
 
     @Test
     void deleteStudentTest() {
-        Student student = newStudent(STUDENT);
+        Student student = studentRepository.save(new Student(1L, "TestingName", 24, null));
         HttpEntity<Student> studentHttpEntity = new HttpEntity<>(student);
-
         ResponseEntity<Student> result =
                 testRestTemplate.exchange("http://localhost:" + port + "/student/" + student.getId(), DELETE, studentHttpEntity, Student.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody()).isEqualTo(studentHttpEntity.getBody());
+        assertThat(result.getBody()).isEqualTo(student);
         result = testRestTemplate.exchange("http://localhost:" + port + "/student/" + student.getId(), DELETE, studentHttpEntity, Student.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        deleteStudent(student.getId());
     }
 
     @Test
     void filterByAgeTest() throws Exception {
-        List<Student> addedStudents = new ArrayList<>(List.of(newStudent(STUDENT), newStudent(STUDENT2), newStudent(STUDENT3)));
-        List<Student> filteredStudents = addedStudents.stream()
-                .filter(s -> s.getAge() == 24)
-                .collect(Collectors.toList());
-
+        studentRepository.save(new Student(1L, "Mock_name", 24, null));
+        studentRepository.save(new Student(2L, "Mock_name", 50, null));
+        studentRepository.save(new Student(3L, "Mock_name", 24, null));
+        List<Student> addedStudents = studentRepository.findAll();
+        addedStudents.remove(1);
         ResponseEntity<List> result =
                 testRestTemplate.getForEntity("http://localhost:" + port + "/student/filter?age=24", List.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(mapper.writeValueAsString(result.getBody())).isEqualTo(mapper.writeValueAsString(filteredStudents));
-        addedStudents.forEach(s -> deleteStudent(s.getId()));
+        assertThat(mapper.writeValueAsString(result.getBody())).isEqualTo(mapper.writeValueAsString(addedStudents));
     }
 
     @Test
     void printAllTest() throws Exception {
-        List<Student> addedStudents = new ArrayList<>(List.of(newStudent(STUDENT), newStudent(STUDENT2), newStudent(STUDENT3)));
-
+        studentRepository.save(new Student(1L, "Mock_name", 24, null));
+        studentRepository.save(new Student(2L, "Mock_name", 50, null));
+        studentRepository.save(new Student(3L, "Mock_name", 24, null));
+        List<Student> addedStudents = studentRepository.findAll();
         ResponseEntity<List> result =
                 testRestTemplate.getForEntity("http://localhost:" + port + "/student", List.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(mapper.writeValueAsString(result.getBody())).isEqualTo(mapper.writeValueAsString(addedStudents));
-        addedStudents.forEach(s -> deleteStudent(s.getId()));
     }
 
     @Test
     void findByAgeBetweenTest() throws Exception {
-        List<Student> addedStudents = new ArrayList<>(List.of(newStudent(STUDENT), newStudent(STUDENT2), newStudent(STUDENT3)));
-        List<Student> filteredStudents = addedStudents.stream()
-                .filter(s -> s.getAge() > 20 && s.getAge() < 30)
-                .collect(Collectors.toList());
-
+        studentRepository.save(new Student(1L, "Mock_name", 24, null));
+        studentRepository.save(new Student(2L, "Mock_name", 50, null));
+        studentRepository.save(new Student(3L, "Mock_name", 24, null));
+        List<Student> addedStudents = studentRepository.findAll();
+        addedStudents.remove(1);
         ResponseEntity<List> result =
                 testRestTemplate.getForEntity("http://localhost:" + port + "/student/filter_range?startAge=20&endAge=30", List.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(mapper.writeValueAsString(result.getBody())).isEqualTo(mapper.writeValueAsString(filteredStudents));
-        addedStudents.forEach(s -> deleteStudent(s.getId()));
+        assertThat(mapper.writeValueAsString(result.getBody())).isEqualTo(mapper.writeValueAsString(addedStudents));
     }
 
     @Test
     void getFaculty() {
-        Student student = newStudent(STUDENT);
+        Faculty faculty = facultyRepository.save(new Faculty(1L, "TestingName", "red", new ArrayList<>()));
+        Student student = studentRepository.save(new Student(1L, "Mock_name", 24, faculty));
         ResponseEntity<Faculty> response =
                 testRestTemplate.getForEntity("http://localhost:" + port + "/student/" + student.getId() + "/faculty", Faculty.class);
-        Faculty facultyResponse = response.getBody();
-        assertThat(facultyResponse).isEqualTo(student.getFaculty());
+        assertThat(response.getBody()).isEqualTo(student.getFaculty());
         ResponseEntity<Faculty> responseNull =
                 testRestTemplate.getForEntity("http://localhost:" + port + "/student/" + -1 + "/faculty", Faculty.class);
         assertThat(responseNull.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        deleteStudent(student.getId());
     }
 
     @Test
@@ -148,41 +140,32 @@ class StudentControllerTest {
         Integer result =
                 testRestTemplate.getForObject("http://localhost:" + port + "/student/students-count", Integer.class);
         assertThat(result.intValue()).isEqualTo(0);
-        Student student = newStudent(STUDENT);
+        Student student = studentRepository.save(new Student(1L, "TestingName", 24, null));
         result =
                 testRestTemplate.getForObject("http://localhost:" + port + "/student/students-count", Integer.class);
         assertThat(result.intValue()).isEqualTo(1);
-        deleteStudent(student.getId());
     }
 
     @Test
     void getAverageAge() {
-        Student student1 = newStudent(STUDENT);
-        Student student2 = newStudent(STUDENT2);
+        Student student1 = studentRepository.save(new Student(1L, "TestingName", 24, null));
+        Student student2 = studentRepository.save(new Student(2L, "Mock_name", 50, null));
         Double result =
                 testRestTemplate.getForObject("http://localhost:" + port + "/student/students-avg-age", Double.class);
         assertThat(result.doubleValue()).isEqualTo(37);
-        deleteStudent(student1.getId());
-        deleteStudent(student2.getId());
-
     }
 
     @Test
     void getFiveLastStudents() {
-        List<Student> listOfStudents = new ArrayList<>(List.of(
-                newStudent(new Student(2L, "Mock_name", 50, FACULTY)),
-                newStudent(new Student(3L, "Mock_name", 50, FACULTY)),
-                newStudent(new Student(4L, "Mock_name", 50, FACULTY)),
-                newStudent(new Student(5L, "Mock_name", 50, FACULTY)),
-                newStudent(new Student(6L, "Mock_name", 50, FACULTY))
-        ));
-        Collections.reverse(listOfStudents);
-        Student mockStudent = newStudent(new Student(1L, "Mock_name", 50, FACULTY));
-
+        for (int i = 1; i < 11; i++) {
+            studentRepository.save(new Student((long) i, "Mock_name", 50, null));
+        }
+        List<Student> listOfStudents = new ArrayList<>();
+        for (int i = 10; i > 5; i--) {
+            listOfStudents.add(studentRepository.findById((long) i).orElse(null));
+        }
         List result =
                 testRestTemplate.getForObject("http://localhost:" + port + "/student/students-five-last", List.class);
-        assertThat(result).isEqualTo(listOfStudents);
-        listOfStudents.forEach(e -> deleteStudent(e.getId()));
-        deleteStudent(mockStudent.getId());
+        assertThat(result.toString()).isEqualTo(listOfStudents.toString());
     }
 }

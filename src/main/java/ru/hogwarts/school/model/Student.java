@@ -76,6 +76,7 @@ public class Student {
 
     @Override
     public String toString() {
-        return "{" + "\"age\"=" + age + ", \"id\"=" + id + ", \"name\"=\"" + name + '\"' + '}';
+        return "{" + "name=" + name + ", id=" + id + ", faculty=" + faculty + ", age=" + age + '}';
+//        return "{" + "\"age\"=" + age + ", \"faculty\"=" + faculty + ", \"id\"=" + id + ", \"name\"=\"" + name + '\"' + '}';
     }
 }

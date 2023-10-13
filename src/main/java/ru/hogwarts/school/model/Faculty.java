@@ -11,7 +11,7 @@ public class Faculty {
     private Long id;
     private String name;
     private String color;
-    @OneToMany(mappedBy = "faculty")
+    @OneToMany(mappedBy = "faculty", fetch = FetchType.EAGER)
     private Collection<Student> students;
 
     public Faculty(Long id, String name, String color, Collection<Student> students) {
@@ -79,10 +79,7 @@ public class Faculty {
 
     @Override
     public String toString() {
-        return "Faculty{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", color='" + color + '\'' +
-                '}';
+//        return "{" + "\"color\"=\"" + color + ", id=" + id + ", \"name\"=\"" + name + "\", \"students\"=" + students + '}';
+        return "{" + "id=" + id + ", name=" + name + ", color=" + color + ", students=" + students + '}';
     }
 }

@@ -47,7 +47,7 @@ class StudentControllerMockTest {
         studentRequest.put("name", NAME_CONSTANT);
         studentRequest.put("age", AGE_CONSTANT);
 
-        when(studentRepository.save(any(Student.class))).thenReturn(STUDENT);
+        when(studentRepository.save(any(Student.class))).thenReturn(STUDENT2);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/student")
@@ -62,7 +62,7 @@ class StudentControllerMockTest {
 
     @Test
     public void getStudentTest() throws Exception {
-        when(studentRepository.findById(anyLong())).thenReturn(Optional.of(STUDENT));
+        when(studentRepository.findById(anyLong())).thenReturn(Optional.of(STUDENT2));
         when(studentRepository.findById(eq(222L))).thenReturn(Optional.empty());
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/student/{id}", "1"))
@@ -81,8 +81,8 @@ class StudentControllerMockTest {
         studentRequest.put("name", NAME_CONSTANT);
         studentRequest.put("age", AGE_CONSTANT);
 
-        when(studentRepository.save(any(Student.class))).thenReturn(STUDENT);
-        when(studentRepository.findById(anyLong())).thenReturn(Optional.of(STUDENT));
+        when(studentRepository.save(any(Student.class))).thenReturn(STUDENT2);
+        when(studentRepository.findById(anyLong())).thenReturn(Optional.of(STUDENT2));
         when(studentRepository.findById(eq(222L))).thenReturn(Optional.empty());
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -108,7 +108,7 @@ class StudentControllerMockTest {
 
     @Test
     public void deleteStudentTest() throws Exception {
-        when(studentRepository.findById(anyLong())).thenReturn(Optional.of(STUDENT));
+        when(studentRepository.findById(anyLong())).thenReturn(Optional.of(STUDENT2));
         when(studentRepository.findById(eq(222L))).thenReturn(Optional.empty());
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -152,7 +152,7 @@ class StudentControllerMockTest {
 
     @Test
     public void getFacultyTest() throws Exception {
-        when(studentRepository.findById(anyLong())).thenReturn(Optional.of(STUDENT));
+        when(studentRepository.findById(anyLong())).thenReturn(Optional.of(STUDENT2));
         when(studentRepository.findById(eq(222L))).thenReturn(Optional.empty());
 
         mockMvc.perform(MockMvcRequestBuilders
