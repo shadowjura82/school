@@ -1,5 +1,6 @@
 package ru.hogwarts.school.service;
 
+import org.apache.logging.log4j.util.PropertySource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -7,9 +8,7 @@ import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repositories.FacultyRepository;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -73,5 +72,12 @@ public class FacultyService {
         return facultyRepository.findById(id)
                 .map(Faculty::getStudents)
                 .orElseGet(Collections::emptyList);
+    }
+
+    public String getLongName() {
+        List<String> tmpList = facultyRepository.findAll().parallelStream()
+                .map(Faculty::getName)
+                .collect(Collectors.toList());
+        return Collections.max(tmpList, Comparator.comparing(String::length));
     }
 }

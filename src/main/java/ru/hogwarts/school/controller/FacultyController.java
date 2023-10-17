@@ -70,4 +70,9 @@ public class FacultyController {
     public ResponseEntity<Collection<Student>> getStudents(@PathVariable Long id) {
         return ResponseEntity.ok(facultyService.getStudents(id));
     }
+
+    @GetMapping(path = "long-name")
+    public ResponseEntity<String> getLongName() {
+        return ResponseEntity.ok(facultyService.getLongName());
+    }
 }

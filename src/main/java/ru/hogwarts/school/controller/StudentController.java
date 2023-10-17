@@ -8,6 +8,7 @@ import ru.hogwarts.school.model.FiveLastStudents;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.StudentService;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.util.Collection;
 import java.util.List;
 
@@ -93,5 +94,20 @@ public class StudentController {
     @GetMapping(path = "students-five-last")
     public ResponseEntity<List<FiveLastStudents>> getFiveLastStudents() {
         return ResponseEntity.ok(studentService.getFiveLastStudents());
+    }
+
+    @GetMapping(path = "sorted-name")
+    public ResponseEntity<List<String>> findByNameSorted() {
+        return ResponseEntity.ok(studentService.findByNameSorted());
+    }
+
+    @GetMapping(path = "average-age")
+    public ResponseEntity<Double> findAverageAge() {
+        return ResponseEntity.ok(studentService.findAverageAge());
+    }
+
+    @GetMapping(path = "intNumber")
+    public ResponseEntity<Integer> getIntNumber() {
+        return ResponseEntity.ok(studentService.getIntNumber());
     }
 }
