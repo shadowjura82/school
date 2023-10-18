@@ -110,4 +110,52 @@ public class StudentService {
                 .limit(1_000_000)
                 .reduce(0, Integer::sum);
     }
+
+    public void printStudentsToConsole() {
+        List<Student> students = studentRepository.findAll();
+
+        System.out.println(students.get(0).getName());
+        System.out.println(students.get(1).getName());
+
+        new Thread(() -> {
+//            try {
+            System.out.println(students.get(2).getName());
+//                Thread.sleep(3000);
+            System.out.println(students.get(3).getName());
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
+        }).start();
+
+        new Thread(() -> {
+//            try {
+            System.out.println(students.get(4).getName());
+//                Thread.sleep(3000);
+            System.out.println(students.get(5).getName());
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
+        }).start();
+    }
+
+    public void printStudentsToConsoleSynchronized() {
+        List<Student> students = studentRepository.findAll();
+
+        printToConsole(students, 0);
+        printToConsole(students, 1);
+
+        new Thread(() -> {
+            printToConsole(students, 2);
+            printToConsole(students, 3);
+        }).start();
+
+        new Thread(() -> {
+            printToConsole(students, 4);
+            printToConsole(students, 5);
+        }).start();
+    }
+
+    private synchronized void printToConsole(List<Student> students, Integer index) {
+        System.out.println(students.get(index).getName());
+    }
 }

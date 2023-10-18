@@ -110,4 +110,14 @@ public class StudentController {
     public ResponseEntity<Integer> getIntNumber() {
         return ResponseEntity.ok(studentService.getIntNumber());
     }
+
+    @GetMapping(path = "print-students-to-console")
+    public void printStudentsToConsole() {
+        studentService.printStudentsToConsole();
+    }
+
+    @GetMapping(path = "print-students-to-console-synchronized")
+    public void printStudentsToConsoleSynchronized() {
+        studentService.printStudentsToConsoleSynchronized();
+    }
 }
