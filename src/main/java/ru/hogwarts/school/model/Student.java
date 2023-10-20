@@ -17,8 +17,7 @@ public class Student {
     @JoinColumn(name = "faculty_id")
     private Faculty faculty;
 
-    public Student(Long id, String name, int age, Faculty faculty) {
-        this.id = id;
+    public Student(String name, int age, Faculty faculty) {
         this.name = name;
         this.age = age;
         this.faculty = faculty;

@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.hogwarts.school.controller.StudentController;
+import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repositories.StudentRepository;
 import ru.hogwarts.school.service.StudentService;
@@ -22,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static ru.hogwarts.school.TestConstants.*;
 
 @WebMvcTest(controllers = StudentController.class)
 class StudentControllerMockTest {
@@ -35,6 +35,10 @@ class StudentControllerMockTest {
     @InjectMocks
     private StudentController studentController;
     private final ObjectMapper mapper = new ObjectMapper();
+    private final Student student = new Student("TestingName", 24, null);
+    private final List<Student> students = new ArrayList<>(List.of(
+            new Student("TestingName", 10, null),
+            new Student("TestingName", 20, null)));
 
     @Test
     public void contextTest() {
@@ -44,10 +48,10 @@ class StudentControllerMockTest {
     @Test
     public void postStudentTest() throws Exception {
         JSONObject studentRequest = new JSONObject();
-        studentRequest.put("name", NAME_CONSTANT);
-        studentRequest.put("age", AGE_CONSTANT);
+        studentRequest.put("name", "TestingName");
+        studentRequest.put("age", "24");
 
-        when(studentRepository.save(any(Student.class))).thenReturn(STUDENT2);
+        when(studentRepository.save(any(Student.class))).thenReturn(student);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/student")
@@ -55,21 +59,18 @@ class StudentControllerMockTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(NAME_CONSTANT))
-                .andExpect(jsonPath("$.age").value(AGE_CONSTANT))
-                .andExpect(jsonPath("$.id").value(DB_ID_CONSTANT));
+                .andExpect(content().json(mapper.writeValueAsString(student)));
     }
 
     @Test
     public void getStudentTest() throws Exception {
-        when(studentRepository.findById(anyLong())).thenReturn(Optional.of(STUDENT2));
+        when(studentRepository.findById(anyLong())).thenReturn(Optional.of(student));
         when(studentRepository.findById(eq(222L))).thenReturn(Optional.empty());
+
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/student/{id}", "1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(NAME_CONSTANT))
-                .andExpect(jsonPath("$.id").value(DB_ID_CONSTANT))
-                .andExpect(jsonPath("$.age").value(AGE_CONSTANT));
+                .andExpect(content().json(mapper.writeValueAsString(student)));
         mockMvc.perform(MockMvcRequestBuilders
                 .get("/{id}", "222")).andExpect(status().isNotFound());
     }
@@ -77,12 +78,12 @@ class StudentControllerMockTest {
     @Test
     public void updateStudentTest() throws Exception {
         JSONObject studentRequest = new JSONObject();
-        studentRequest.put("id", DB_ID_CONSTANT);
-        studentRequest.put("name", NAME_CONSTANT);
-        studentRequest.put("age", AGE_CONSTANT);
+        studentRequest.put("id", "1");
+        studentRequest.put("name", "TestingName");
+        studentRequest.put("age", "24");
 
-        when(studentRepository.save(any(Student.class))).thenReturn(STUDENT2);
-        when(studentRepository.findById(anyLong())).thenReturn(Optional.of(STUDENT2));
+        when(studentRepository.save(any(Student.class))).thenReturn(student);
+        when(studentRepository.findById(anyLong())).thenReturn(Optional.of(student));
         when(studentRepository.findById(eq(222L))).thenReturn(Optional.empty());
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -91,9 +92,7 @@ class StudentControllerMockTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(NAME_CONSTANT))
-                .andExpect(jsonPath("$.age").value(AGE_CONSTANT))
-                .andExpect(jsonPath("$.id").value(DB_ID_CONSTANT));
+                .andExpect(content().json(mapper.writeValueAsString(student)));
 
         JSONObject wrongStudent = new JSONObject();
         wrongStudent.put("id", "222");
@@ -108,15 +107,13 @@ class StudentControllerMockTest {
 
     @Test
     public void deleteStudentTest() throws Exception {
-        when(studentRepository.findById(anyLong())).thenReturn(Optional.of(STUDENT2));
+        when(studentRepository.findById(anyLong())).thenReturn(Optional.of(student));
         when(studentRepository.findById(eq(222L))).thenReturn(Optional.empty());
 
         mockMvc.perform(MockMvcRequestBuilders
                         .delete("/student/{id}", "1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(NAME_CONSTANT))
-                .andExpect(jsonPath("$.age").value(AGE_CONSTANT))
-                .andExpect(jsonPath("$.id").value(DB_ID_CONSTANT));
+                .andExpect(content().json(mapper.writeValueAsString(student)));
 
         mockMvc.perform(MockMvcRequestBuilders
                         .delete("/student/{id}", "222"))
@@ -125,40 +122,46 @@ class StudentControllerMockTest {
 
     @Test
     public void filterByAgeTest() throws Exception {
-        when(studentRepository.findByAge(anyInt())).thenReturn(COLLECTION_OF_STUDENTS);
+        when(studentRepository.findByAge(anyInt())).thenReturn(students);
+
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/student/filter?age=50"))
+                        .get("/student/filter?age=24"))
                 .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(COLLECTION_OF_STUDENTS)));
+                .andExpect(content().json(mapper.writeValueAsString(students)));
     }
 
     @Test
     public void printAllTest() throws Exception {
-        when(studentRepository.findAll()).thenReturn(COLLECTION_OF_STUDENTS);
+        when(studentRepository.findAll()).thenReturn(students);
+
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/student"))
                 .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(COLLECTION_OF_STUDENTS)));
+                .andExpect(content().json(mapper.writeValueAsString(students)));
     }
 
     @Test
     public void findByAgeBetweenTest() throws Exception {
-        when(studentRepository.findByAgeBetween(anyInt(), anyInt())).thenReturn(COLLECTION_OF_STUDENTS);
+        when(studentRepository.findByAgeBetween(anyInt(), anyInt())).thenReturn(students);
+
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/student/filter_range?startAge=5&endAge=10"))
                 .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(COLLECTION_OF_STUDENTS)));
+                .andExpect(content().json(mapper.writeValueAsString(students)));
     }
 
     @Test
     public void getFacultyTest() throws Exception {
-        when(studentRepository.findById(anyLong())).thenReturn(Optional.of(STUDENT2));
+        Faculty faculty = new Faculty("TestingName", "red", null);
+        student.setFaculty(faculty);
+
+        when(studentRepository.findById(anyLong())).thenReturn(Optional.of(student));
         when(studentRepository.findById(eq(222L))).thenReturn(Optional.empty());
 
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/student/{id}/faculty", "1"))
                 .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(FACULTY)));
+                .andExpect(content().json(mapper.writeValueAsString(faculty)));
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/student/{id}/faculty", "222"))
                 .andExpect(status().isNotFound());
@@ -167,6 +170,7 @@ class StudentControllerMockTest {
     @Test
     public void getStudentsAmount() throws Exception {
         when(studentRepository.getStudentsAmount()).thenReturn(4);
+
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/student/students-count"))
                 .andExpect(status().isOk())
@@ -176,6 +180,7 @@ class StudentControllerMockTest {
     @Test
     void getAverageAge() throws Exception {
         when(studentRepository.getAverageAge()).thenReturn(37.22);
+
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/student/students-avg-age"))
                 .andExpect(status().isOk())
@@ -183,16 +188,38 @@ class StudentControllerMockTest {
     }
 
     @Test
-    void getFiveLastStudents() {
+    void findByNameSorted() throws Exception {
         List<Student> listOfStudents = new ArrayList<>(List.of(
-                new Student(2L, "Mock_name", 50, FACULTY),
-                new Student(3L, "Mock_name", 50, FACULTY),
-                new Student(4L, "Mock_name", 50, FACULTY),
-                new Student(5L, "Mock_name", 50, FACULTY),
-                new Student(6L, "Mock_name", 50, FACULTY)
-        ));
-//        when(studentRepository.getFiveLastStudents()).thenReturn(listOfStudents);
+                new Student("aifth__2", 10, null),
+                new Student("aecond__3", 20, null),
+                new Student("Azex__5", 30, null),
+                new Student("Alex2__4", 40, null),
+                new Student("Tenth__8", 50, null)));
+        List<String> expectedList = new ArrayList<>(List.of("AECOND__3", "AIFTH__2", "ALEX2__4", "AZEX__5"));
 
-//        Нужно узнать как сделать этот тест
+        when(studentRepository.findAll()).thenReturn(listOfStudents);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/student/sorted-name"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedList.toString()));
+    }
+
+    @Test
+    void findAverageAge() throws Exception {
+        when(studentRepository.findAll()).thenReturn(students);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/student/average-age"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("15.0"));
+    }
+
+    @Test
+    void getIntNumber() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/student/intNumber"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("1784293664"));
     }
 }

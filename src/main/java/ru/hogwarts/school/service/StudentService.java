@@ -118,23 +118,13 @@ public class StudentService {
         System.out.println(students.get(1).getName());
 
         new Thread(() -> {
-//            try {
             System.out.println(students.get(2).getName());
-//                Thread.sleep(3000);
             System.out.println(students.get(3).getName());
-//            } catch (InterruptedException e) {
-//                throw new RuntimeException(e);
-//            }
         }).start();
 
         new Thread(() -> {
-//            try {
             System.out.println(students.get(4).getName());
-//                Thread.sleep(3000);
             System.out.println(students.get(5).getName());
-//            } catch (InterruptedException e) {
-//                throw new RuntimeException(e);
-//            }
         }).start();
     }
 
